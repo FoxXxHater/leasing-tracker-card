@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.0] - 15-06-2026
+
+- Kompatibilität mit neuer Leasing Tracker Integration (v2+)
+    - Sensoren werden jetzt über die Geräte-Registry erkannt (sprach- und umbenennungssicher)
+    - Status-Werte (on_plan, over_plan, ...) werden korrekt übersetzt
+    - Unterstützung für km und Meilen (dynamische Einheit)
+- Grafischer Editor repariert und in die Karte integriert
+    - Status-Sensor per Entity-Picker auswählbar
+    - Alle Optionen per Schalter konfigurierbar
+- Rückwärtskompatibilität zur alten Integration beibehalten
+
 ## [1.1.0] - 09-02-2026
 
 - Mobile UI Fix
