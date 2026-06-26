@@ -45,6 +45,7 @@ A custom Lovelace card for the Leasing Tracker integration.
 - 🎨 **Color coding** - Green/Yellow/Red status
 - 📱 **Responsive** - Works everywhere
 - ⚙️ **Graphical editor** - Configure everything with clicks, no YAML required
+- 🌐 **Automatic translation** - Texts follow the Home Assistant system language (German / English)
 
 ## ⚠️ Important
 
@@ -202,6 +203,10 @@ show_average_day: false
 | `show_average_day` | `true` | Ø per day |
 | `show_average_month` | `true` | Ø per month |
 | `show_remaining_days` | `true` | Remaining days |
+| `show_end_date` | `true` | Lease end date |
+| `show_estimated_lease_end` | `true` | Estimated odometer at lease end |
+| `show_excess_km` | `true` | Estimated excess distance |
+| `show_excess_cost` | `true` | Estimated excess cost |
 | `show_progress` | `true` | Progress bar |
 | `columns` | `2` | Number of columns (desktop) |
 | `columns_mobile` | `1` | Number of columns (mobile, < 600px) |
@@ -273,7 +278,7 @@ show_remaining_days: false
 ## 🤝 Compatibility
 
 - **Home Assistant:** 2023.x+
-- **Leasing Tracker Integration:** v1.1.3+
+- **Leasing Tracker Integration:** v1.1.3+ (new sensors require v1.4.0+)
 
 ## Tested with:
 - **Core:** 2026.1.2 and 2026.1.3
@@ -316,6 +321,7 @@ MIT License
 - 🎨 **Farbcodierung** - Grün/Gelb/Rot Status
 - 📱 **Responsive** - Funktioniert überall
 - ⚙️ **Grafischer Editor** - Alles per Klick konfigurierbar, kein YAML nötig
+- 🌐 **Automatische Übersetzung** - Texte richten sich nach der Systemsprache von Home Assistant (Deutsch / Englisch)
 
 ## ⚠️ Wichtig
 
@@ -473,6 +479,10 @@ show_average_day: false
 | `show_average_day` | `true` | Ø pro Tag |
 | `show_average_month` | `true` | Ø pro Monat |
 | `show_remaining_days` | `true` | Verbleibende Tage |
+| `show_end_date` | `true` | Leasing-Enddatum |
+| `show_estimated_lease_end` | `true` | Geschätzter Stand am Leasingende |
+| `show_excess_km` | `true` | Geschätzte Mehr-Strecke |
+| `show_excess_cost` | `true` | Geschätzte Mehrkosten |
 | `show_progress` | `true` | Fortschrittsbalken |
 | `columns` | `2` | Anzahl der Spalten (Desktop) |
 | `columns_mobile` | `1` | Anzahl der Spalten (Mobil, < 600px) |
@@ -544,7 +554,7 @@ show_remaining_days: false
 ## 🤝 Kompatibilität
 
 - **Home Assistant:** 2023.x+
-- **Leasing Tracker Integration:** v1.1.3+
+- **Leasing Tracker Integration:** v1.1.3+ (neue Sensoren benötigen v1.4.0+)
 
 ## Getestet mit:
 - **Core:** 2026.1.2 und 2026.1.3

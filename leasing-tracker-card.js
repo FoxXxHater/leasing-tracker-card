@@ -1,3 +1,136 @@
+/* =========================================================================
+ *  ÜBERSETZUNGEN / TRANSLATIONS
+ *  Die Texte werden automatisch in der Systemsprache von Home Assistant
+ *  angezeigt (Deutsch oder Englisch). Fällt auf Englisch zurück, wenn die
+ *  Sprache nicht unterstützt wird.
+ * ========================================================================= */
+const LEASING_TRANSLATIONS = {
+  de: {
+    // Karte
+    default_title: 'Leasing Tracker',
+    error_no_entity: 'Bitte definiere eine Entity (Status-Sensor)',
+    // Status-Werte
+    status_on_plan: 'Im Plan',
+    status_over_plan: 'Über Plan',
+    status_significantly_over_plan: 'Deutlich über Plan',
+    status_under_plan: 'Unter Plan',
+    status_unknown: 'Unbekannt',
+    status_unavailable: 'Nicht verfügbar',
+    // Metrik-Labels
+    metric_remaining_month: 'Verbleibend (Monat)',
+    metric_remaining_year: 'Verbleibend (Jahr)',
+    metric_remaining_total: 'Verbleibend (Gesamt)',
+    metric_driven: 'Gefahrene Strecke',
+    metric_difference: 'Differenz zum Plan',
+    metric_avg_day: 'Ø pro Tag',
+    metric_avg_month: 'Ø pro Monat',
+    metric_days: 'Verbleibende Tage',
+    metric_end_date: 'Leasing-Enddatum',
+    metric_estimated_lease_end: 'Schätzung Stand am Leasingende',
+    metric_excess_km: 'Geschätzte Mehr-Strecke',
+    metric_excess_cost: 'Geschätzte Mehrkosten',
+    progress_label: 'Zeitfortschritt',
+    // Editor
+    editor_section_base: 'Basis-Einstellungen',
+    editor_section_layout: 'Layout',
+    editor_section_elements: 'Anzuzeigende Elemente',
+    editor_entity: 'Status-Sensor (erforderlich)',
+    editor_title: 'Titel',
+    editor_title_hint: 'Leer lassen für Standard ("Leasing Tracker")',
+    editor_columns: 'Spalten (Desktop)',
+    editor_columns_mobile: 'Spalten (Mobil)',
+    editor_show_title: 'Titel anzeigen',
+    editor_show_status: 'Status anzeigen',
+    editor_show_remaining_month: 'Verbleibend (Monat)',
+    editor_show_remaining_year: 'Verbleibend (Jahr)',
+    editor_show_remaining_total: 'Verbleibend (Gesamt)',
+    editor_show_driven: 'Gefahrene Strecke',
+    editor_show_difference: 'Differenz zum Plan',
+    editor_show_avg_day: 'Ø pro Tag',
+    editor_show_avg_month: 'Ø pro Monat',
+    editor_show_days: 'Verbleibende Tage',
+    editor_show_end_date: 'Leasing-Enddatum',
+    editor_show_estimated_lease_end: 'Schätzung Stand am Leasingende',
+    editor_show_excess_km: 'Geschätzte Mehr-Strecke',
+    editor_show_excess_cost: 'Geschätzte Mehrkosten',
+    editor_show_progress: 'Fortschrittsbalken',
+  },
+  en: {
+    // Card
+    default_title: 'Leasing Tracker',
+    error_no_entity: 'Please define an entity (status sensor)',
+    // Status values
+    status_on_plan: 'On Plan',
+    status_over_plan: 'Over Plan',
+    status_significantly_over_plan: 'Significantly Over Plan',
+    status_under_plan: 'Under Plan',
+    status_unknown: 'Unknown',
+    status_unavailable: 'Unavailable',
+    // Metric labels
+    metric_remaining_month: 'Remaining (month)',
+    metric_remaining_year: 'Remaining (year)',
+    metric_remaining_total: 'Remaining (total)',
+    metric_driven: 'Distance driven',
+    metric_difference: 'Difference to plan',
+    metric_avg_day: 'Ø per day',
+    metric_avg_month: 'Ø per month',
+    metric_days: 'Remaining days',
+    metric_end_date: 'Lease end date',
+    metric_estimated_lease_end: 'Est. odometer at lease end',
+    metric_excess_km: 'Estimated excess distance',
+    metric_excess_cost: 'Estimated excess cost',
+    progress_label: 'Time progress',
+    // Editor
+    editor_section_base: 'Basic settings',
+    editor_section_layout: 'Layout',
+    editor_section_elements: 'Elements to display',
+    editor_entity: 'Status sensor (required)',
+    editor_title: 'Title',
+    editor_title_hint: 'Leave empty for default ("Leasing Tracker")',
+    editor_columns: 'Columns (desktop)',
+    editor_columns_mobile: 'Columns (mobile)',
+    editor_show_title: 'Show title',
+    editor_show_status: 'Show status',
+    editor_show_remaining_month: 'Remaining (month)',
+    editor_show_remaining_year: 'Remaining (year)',
+    editor_show_remaining_total: 'Remaining (total)',
+    editor_show_driven: 'Distance driven',
+    editor_show_difference: 'Difference to plan',
+    editor_show_avg_day: 'Ø per day',
+    editor_show_avg_month: 'Ø per month',
+    editor_show_days: 'Remaining days',
+    editor_show_end_date: 'Lease end date',
+    editor_show_estimated_lease_end: 'Est. odometer at lease end',
+    editor_show_excess_km: 'Estimated excess distance',
+    editor_show_excess_cost: 'Estimated excess cost',
+    editor_show_progress: 'Progress bar',
+  },
+};
+
+/**
+ * Ermittelt die aktive Sprache aus dem hass-Objekt.
+ * Unterstützt Deutsch ('de'); alles andere fällt auf Englisch zurück.
+ */
+function leasingResolveLang(hass) {
+  const raw =
+    (hass && (hass.language || (hass.locale && hass.locale.language))) || 'en';
+  const short = String(raw).toLowerCase().split('-')[0];
+  return LEASING_TRANSLATIONS[short] ? short : 'en';
+}
+
+/**
+ * Übersetzungs-Helfer. Gibt den Text in der gewünschten Sprache zurück,
+ * mit Fallback auf Englisch und schließlich auf den Key selbst.
+ */
+function leasingT(hass, key) {
+  const lang = leasingResolveLang(hass);
+  return (
+    (LEASING_TRANSLATIONS[lang] && LEASING_TRANSLATIONS[lang][key]) ||
+    LEASING_TRANSLATIONS.en[key] ||
+    key
+  );
+}
+
 class LeasingTrackerCard extends HTMLElement {
   constructor() {
     super();
@@ -7,7 +140,7 @@ class LeasingTrackerCard extends HTMLElement {
 
   setConfig(config) {
     if (!config.entity) {
-      throw new Error('Bitte definiere eine Entity (Status-Sensor)');
+      throw new Error('Bitte definiere eine Entity (Status-Sensor) / Please define an entity (status sensor)');
     }
     this._config = config;
     this._initialized = false;
@@ -15,6 +148,10 @@ class LeasingTrackerCard extends HTMLElement {
     if (this._hass) {
       this.render();
     }
+  }
+
+  _t(key) {
+    return leasingT(this._hass, key);
   }
 
   set hass(hass) {
@@ -130,6 +267,10 @@ class LeasingTrackerCard extends HTMLElement {
       days_total: 'days_total',
       progress_percentage: 'progress',
       km_difference: 'difference',
+      end_date: 'end_date',
+      estimated_km_lease_end: 'estimated_lease_end',
+      estimated_excess_km: 'excess_km',
+      estimated_excess_cost: 'excess_cost',
     };
 
     // 1) Versuche, die Sensoren über die Geräte-Registry zu finden.
@@ -189,6 +330,10 @@ class LeasingTrackerCard extends HTMLElement {
         { key: 'avg_day', terms: ['average_distance_per_day', 'durchschnittliche_strecke_pro_tag', 'durchschnitt_km_pro_tag'] },
         { key: 'avg_month', terms: ['average_distance_per_month', 'durchschnittliche_strecke_pro_monat', 'durchschnitt_km_pro_monat'] },
         { key: 'days', terms: ['remaining_days', 'verbleibende_tage'] },
+        { key: 'end_date', terms: ['lease_end_date', 'leasing_enddatum', 'einddatum_lease'] },
+        { key: 'estimated_lease_end', terms: ['estimated_odometer_at_lease_end', 'geschatzter_kilometerstand_am_leasingende', 'geschatte_kilometerstand_bij_einde_lease'] },
+        { key: 'excess_km', terms: ['estimated_excess_distance', 'geschatzte_mehr_strecke', 'geschatte_extra_afstand'] },
+        { key: 'excess_cost', terms: ['estimated_excess_cost', 'geschatzte_mehrkosten', 'geschatte_extra_kosten'] },
       ];
 
       Object.keys(hass.states).forEach((entityId) => {
@@ -242,7 +387,7 @@ class LeasingTrackerCard extends HTMLElement {
           <ha-icon icon="mdi:car-info" style="color: ${statusColor};"></ha-icon>
         </div>
         <div class="header-text">
-          <div class="title">${this._config.title || 'Leasing Tracker'}</div>
+          <div class="title">${this._config.title || this._t('default_title')}</div>
           ${showStatus ? `
             <div class="status-badge" style="background: ${statusColor}30; color: ${statusColor};">
               ${status}
@@ -254,17 +399,20 @@ class LeasingTrackerCard extends HTMLElement {
   }
 
   translateStatus(status) {
-    // Übersetzt die Status-Keys der neuen Integration ins Deutsche.
+    // Übersetzt die Status-Keys der Integration in die Systemsprache.
     // Akzeptiert auch bereits übersetzte Werte (Rückwärtskompatibilität).
-    const map = {
-      on_plan: 'Im Plan',
-      over_plan: 'Über Plan',
-      significantly_over_plan: 'Deutlich über Plan',
-      under_plan: 'Unter Plan',
-      unknown: 'Unbekannt',
-      unavailable: 'Nicht verfügbar',
+    const keyMap = {
+      on_plan: 'status_on_plan',
+      over_plan: 'status_over_plan',
+      significantly_over_plan: 'status_significantly_over_plan',
+      under_plan: 'status_under_plan',
+      unknown: 'status_unknown',
+      unavailable: 'status_unavailable',
     };
-    return map[status] || status;
+    if (keyMap[status]) {
+      return this._t(keyMap[status]);
+    }
+    return status;
   }
 
   renderContent(sensors) {
@@ -274,7 +422,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Verbleibende KM Monat
     if (config.show_km_remaining_month !== false && sensors.remaining_month) {
       html += this.renderMetric(
-        'Verbleibend (Monat)',
+        this._t('metric_remaining_month'),
         sensors.remaining_month,
         'mdi:calendar-month',
         this.getKmColor(sensors.remaining_month.state)
@@ -284,7 +432,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Verbleibende KM Jahr
     if (config.show_km_remaining_year !== false && sensors.remaining_year) {
       html += this.renderMetric(
-        'Verbleibend (Jahr)',
+        this._t('metric_remaining_year'),
         sensors.remaining_year,
         'mdi:calendar-clock',
         this.getKmColor(sensors.remaining_year.state)
@@ -294,7 +442,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Verbleibende KM Gesamt
     if (config.show_km_remaining_total !== false && sensors.remaining_total) {
       html += this.renderMetric(
-        'Verbleibend (Gesamt)',
+        this._t('metric_remaining_total'),
         sensors.remaining_total,
         'mdi:counter',
         'var(--primary-color)'
@@ -304,7 +452,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Gefahrene Strecke
     if (config.show_km_driven !== false && sensors.driven) {
       html += this.renderMetric(
-        'Gefahrene Strecke',
+        this._t('metric_driven'),
         sensors.driven,
         'mdi:speedometer',
         'var(--info-color)'
@@ -314,7 +462,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Differenz
     if (config.show_km_difference !== false && sensors.difference) {
       html += this.renderMetric(
-        'Differenz zum Plan',
+        this._t('metric_difference'),
         sensors.difference,
         'mdi:delta',
         this.getDifferenceColor(sensors.difference.state)
@@ -324,7 +472,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Durchschnitt Tag
     if (config.show_average_day !== false && sensors.avg_day) {
       html += this.renderMetric(
-        'Ø pro Tag',
+        this._t('metric_avg_day'),
         sensors.avg_day,
         'mdi:chart-line',
         'var(--warning-color)'
@@ -334,7 +482,7 @@ class LeasingTrackerCard extends HTMLElement {
     // Durchschnitt Monat
     if (config.show_average_month !== false && sensors.avg_month) {
       html += this.renderMetric(
-        'Ø pro Monat',
+        this._t('metric_avg_month'),
         sensors.avg_month,
         'mdi:chart-bar',
         'var(--warning-color)'
@@ -344,10 +492,58 @@ class LeasingTrackerCard extends HTMLElement {
     // Verbleibende Tage
     if (config.show_remaining_days !== false && sensors.days) {
       html += this.renderMetric(
-        'Verbleibende Tage',
+        this._t('metric_days'),
         sensors.days,
         'mdi:calendar-end',
         'var(--secondary-text-color)'
+      );
+    }
+    
+    // Leasing-Enddatum (Datum statt Zahl)
+    if (config.show_end_date !== false && sensors.end_date) {
+      html += this.renderDateMetric(
+        this._t('metric_end_date'),
+        sensors.end_date,
+        'mdi:calendar-end',
+        'var(--primary-color)'
+      );
+    }
+    
+    // Geschätzter Stand am Leasingende
+    if (config.show_estimated_lease_end !== false && sensors.estimated_lease_end) {
+      html += this.renderMetric(
+        this._t('metric_estimated_lease_end'),
+        sensors.estimated_lease_end,
+        'mdi:map-marker-distance',
+        'var(--info-color)'
+      );
+    }
+    
+    // Geschätzte Mehr-Strecke
+    if (config.show_excess_km !== false && sensors.excess_km) {
+      const excessVal = parseFloat(sensors.excess_km.state);
+      const excessColor = !isNaN(excessVal) && excessVal > 0
+        ? 'var(--error-color)'
+        : 'var(--success-color)';
+      html += this.renderMetric(
+        this._t('metric_excess_km'),
+        sensors.excess_km,
+        'mdi:alert-circle-outline',
+        excessColor
+      );
+    }
+    
+    // Geschätzte Mehrkosten
+    if (config.show_excess_cost !== false && sensors.excess_cost) {
+      const costVal = parseFloat(sensors.excess_cost.state);
+      const costColor = !isNaN(costVal) && costVal > 0
+        ? 'var(--error-color)'
+        : 'var(--success-color)';
+      html += this.renderCostMetric(
+        this._t('metric_excess_cost'),
+        sensors.excess_cost,
+        'mdi:cash-multiple',
+        costColor
       );
     }
     
@@ -380,6 +576,78 @@ class LeasingTrackerCard extends HTMLElement {
     `;
   }
 
+  renderDateMetric(label, entity, icon, color) {
+    const value = this.formatDate(entity.state);
+    
+    return `
+      <div class="metric" data-entity="${entity.entity_id}">
+        <div class="metric-icon" style="background: ${color}20;">
+          <ha-icon icon="${icon}" style="color: ${color};"></ha-icon>
+        </div>
+        <div class="metric-content">
+          <div class="metric-label">${label}</div>
+          <div class="metric-value" style="color: ${color};">
+            ${value}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderCostMetric(label, entity, icon, color) {
+    const value = this.formatCurrency(
+      entity.state,
+      entity.attributes.unit_of_measurement
+    );
+    
+    return `
+      <div class="metric" data-entity="${entity.entity_id}">
+        <div class="metric-icon" style="background: ${color}20;">
+          <ha-icon icon="${icon}" style="color: ${color};"></ha-icon>
+        </div>
+        <div class="metric-content">
+          <div class="metric-label">${label}</div>
+          <div class="metric-value" style="color: ${color};">
+            ${value}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  formatDate(value) {
+    if (!value || value === 'unknown' || value === 'unavailable') {
+      return this._t('status_unknown');
+    }
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return value;
+    const lang = leasingResolveLang(this._hass);
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    return d.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  }
+
+  formatCurrency(value, currencyCode) {
+    const num = parseFloat(value);
+    if (isNaN(num)) return value;
+    const lang = leasingResolveLang(this._hass);
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    // Versuche, das Währungssymbol über Intl zu nutzen; bei ungültigem
+    // Code wird der Code selbst angehängt.
+    try {
+      return num.toLocaleString(locale, {
+        style: 'currency',
+        currency: currencyCode || 'EUR',
+        maximumFractionDigits: 2,
+      });
+    } catch (e) {
+      return `${num.toLocaleString(locale, { maximumFractionDigits: 2 })} ${currencyCode || ''}`.trim();
+    }
+  }
+
   renderProgress(entity) {
     const progress = Math.min(100, Math.max(0, parseFloat(entity.state)));
     const color = progress > 90 ? 'var(--error-color)' : 
@@ -389,7 +657,7 @@ class LeasingTrackerCard extends HTMLElement {
     return `
       <div class="progress-section">
         <div class="progress-header">
-          <span class="progress-label">Zeitfortschritt</span>
+          <span class="progress-label">${this._t('progress_label')}</span>
           <span class="progress-percent">${progress.toFixed(1)}%</span>
         </div>
         <div class="progress-bar">
@@ -403,10 +671,14 @@ class LeasingTrackerCard extends HTMLElement {
     const num = parseFloat(value);
     if (isNaN(num)) return value;
     
+    // Zahlenformat an die Systemsprache anpassen
+    const lang = leasingResolveLang(this._hass);
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    
     if (Math.abs(num) >= 1000) {
-      return num.toLocaleString('de-DE', { maximumFractionDigits: 0 });
+      return num.toLocaleString(locale, { maximumFractionDigits: 0 });
     }
-    return num.toLocaleString('de-DE', { maximumFractionDigits: 2 });
+    return num.toLocaleString(locale, { maximumFractionDigits: 2 });
   }
 
   getStatusColor(status) {
@@ -699,18 +971,24 @@ class LeasingTrackerCardEditor extends HTMLElement {
   render() {
     if (!this._config || !this._hass) return;
 
+    const t = (key) => leasingT(this._hass, key);
+
     const switches = [
-      { key: 'show_title', label: 'Titel anzeigen' },
-      { key: 'show_status', label: 'Status anzeigen' },
-      { key: 'show_km_remaining_month', label: 'Verbleibend (Monat)' },
-      { key: 'show_km_remaining_year', label: 'Verbleibend (Jahr)' },
-      { key: 'show_km_remaining_total', label: 'Verbleibend (Gesamt)' },
-      { key: 'show_km_driven', label: 'Gefahrene Strecke' },
-      { key: 'show_km_difference', label: 'Differenz zum Plan' },
-      { key: 'show_average_day', label: 'Ø pro Tag' },
-      { key: 'show_average_month', label: 'Ø pro Monat' },
-      { key: 'show_remaining_days', label: 'Verbleibende Tage' },
-      { key: 'show_progress', label: 'Fortschrittsbalken' },
+      { key: 'show_title', label: t('editor_show_title') },
+      { key: 'show_status', label: t('editor_show_status') },
+      { key: 'show_km_remaining_month', label: t('editor_show_remaining_month') },
+      { key: 'show_km_remaining_year', label: t('editor_show_remaining_year') },
+      { key: 'show_km_remaining_total', label: t('editor_show_remaining_total') },
+      { key: 'show_km_driven', label: t('editor_show_driven') },
+      { key: 'show_km_difference', label: t('editor_show_difference') },
+      { key: 'show_average_day', label: t('editor_show_avg_day') },
+      { key: 'show_average_month', label: t('editor_show_avg_month') },
+      { key: 'show_remaining_days', label: t('editor_show_days') },
+      { key: 'show_end_date', label: t('editor_show_end_date') },
+      { key: 'show_estimated_lease_end', label: t('editor_show_estimated_lease_end') },
+      { key: 'show_excess_km', label: t('editor_show_excess_km') },
+      { key: 'show_excess_cost', label: t('editor_show_excess_cost') },
+      { key: 'show_progress', label: t('editor_show_progress') },
     ];
 
     const container = document.createElement('div');
@@ -751,24 +1029,24 @@ class LeasingTrackerCardEditor extends HTMLElement {
       </style>
 
       <div class="section">
-        <div class="section-title">Basis-Einstellungen</div>
+        <div class="section-title">${t('editor_section_base')}</div>
         <div class="option" id="entity-slot"></div>
         <div class="option">
-          <ha-textfield id="title-field" label="Titel" value="${(this._config.title || '').replace(/"/g, '&quot;')}"></ha-textfield>
-          <div class="hint">Leer lassen für Standard ("Leasing Tracker")</div>
+          <ha-textfield id="title-field" label="${t('editor_title')}" value="${(this._config.title || '').replace(/"/g, '&quot;')}"></ha-textfield>
+          <div class="hint">${t('editor_title_hint')}</div>
         </div>
       </div>
 
       <div class="section">
-        <div class="section-title">Layout</div>
+        <div class="section-title">${t('editor_section_layout')}</div>
         <div class="row2">
-          <ha-textfield id="columns-field" type="number" min="1" max="4" label="Spalten (Desktop)" value="${this._config.columns ?? 2}"></ha-textfield>
-          <ha-textfield id="columns-mobile-field" type="number" min="1" max="4" label="Spalten (Mobil)" value="${this._config.columns_mobile ?? 1}"></ha-textfield>
+          <ha-textfield id="columns-field" type="number" min="1" max="4" label="${t('editor_columns')}" value="${this._config.columns ?? 2}"></ha-textfield>
+          <ha-textfield id="columns-mobile-field" type="number" min="1" max="4" label="${t('editor_columns_mobile')}" value="${this._config.columns_mobile ?? 1}"></ha-textfield>
         </div>
       </div>
 
       <div class="section">
-        <div class="section-title">Anzuzeigende Elemente</div>
+        <div class="section-title">${t('editor_section_elements')}</div>
         ${switches
           .map(
             (s) => `
@@ -788,7 +1066,7 @@ class LeasingTrackerCardEditor extends HTMLElement {
     const entityPicker = document.createElement('ha-entity-picker');
     entityPicker.hass = this._hass;
     entityPicker.value = this._config.entity || '';
-    entityPicker.label = 'Status-Sensor (erforderlich)';
+    entityPicker.label = t('editor_entity');
     entityPicker.includeDomains = ['sensor'];
     entityPicker.allowCustomEntity = true;
     entityPicker.addEventListener('value-changed', (e) => {
@@ -838,7 +1116,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c  LEASING-TRACKER-CARD  %c v1.2.0 ',
+  '%c  LEASING-TRACKER-CARD  %c v1.4.0 ',
   'color: white; background: #4A90E2; font-weight: 700;',
   'color: #4A90E2; background: white; font-weight: 700;'
 );
