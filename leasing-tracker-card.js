@@ -39,6 +39,11 @@ const LEASING_TRANSLATIONS = {
     editor_title_hint: 'Leer lassen für Standard ("Leasing Tracker")',
     editor_columns: 'Spalten (Desktop)',
     editor_columns_mobile: 'Spalten (Mobil)',
+    editor_date_format: 'Datumsformat',
+    editor_date_format_auto: 'Automatisch (Home Assistant)',
+    editor_date_format_dmy: 'Tag.Monat.Jahr',
+    editor_date_format_mdy: 'Monat/Tag/Jahr',
+    editor_date_format_ymd: 'Jahr-Monat-Tag',
     editor_show_title: 'Titel anzeigen',
     editor_show_status: 'Status anzeigen',
     editor_show_remaining_month: 'Verbleibend (Monat)',
@@ -89,6 +94,11 @@ const LEASING_TRANSLATIONS = {
     editor_title_hint: 'Leave empty for default ("Leasing Tracker")',
     editor_columns: 'Columns (desktop)',
     editor_columns_mobile: 'Columns (mobile)',
+    editor_date_format: 'Date format',
+    editor_date_format_auto: 'Automatic (Home Assistant)',
+    editor_date_format_dmy: 'Day.Month.Year',
+    editor_date_format_mdy: 'Month/Day/Year',
+    editor_date_format_ymd: 'Year-Month-Day',
     editor_show_title: 'Show title',
     editor_show_status: 'Show status',
     editor_show_remaining_month: 'Remaining (month)',
@@ -169,6 +179,20 @@ class LeasingTrackerCard extends HTMLElement {
 
   _hasRelevantChange(oldHass, newHass) {
     if (!oldHass) return true;
+    
+    // Sprach-/Regionswechsel: sofort neu rendern, damit Datums-,
+    // Zahlen- und Textformate der neuen Einstellung folgen.
+    const oldLoc = oldHass.locale || {};
+    const newLoc = newHass.locale || {};
+    if (
+      oldHass.language !== newHass.language ||
+      oldLoc.language !== newLoc.language ||
+      oldLoc.number_format !== newLoc.number_format ||
+      oldLoc.date_format !== newLoc.date_format ||
+      oldLoc.time_format !== newLoc.time_format
+    ) {
+      return true;
+    }
     
     // Beim ersten Mal sind die Sensoren evtl. noch nicht gecached
     const sensors = this._sensorCache || this.findSensors();
@@ -615,26 +639,96 @@ class LeasingTrackerCard extends HTMLElement {
     `;
   }
 
+  /**
+   * Ermittelt das BCP-47-Locale für Intl-Formatierungen.
+   * Nutzt bevorzugt die echte Sprache aus hass.locale.language
+   * (z. B. "en-GB", "nl", "fr"), damit Datums- und Zahlenformate
+   * der Home-Assistant-Einstellung des Nutzers folgen – nicht nur DE/EN.
+   */
+  _resolveLocale() {
+    const hass = this._hass;
+    const lang =
+      (hass &&
+        ((hass.locale && hass.locale.language) || hass.language)) ||
+      'en';
+    return String(lang);
+  }
+
   formatDate(value) {
     if (!value || value === 'unknown' || value === 'unavailable') {
       return this._t('status_unknown');
     }
     const d = new Date(value);
     if (isNaN(d.getTime())) return value;
-    const lang = leasingResolveLang(this._hass);
-    const locale = lang === 'de' ? 'de-DE' : 'en-US';
-    return d.toLocaleDateString(locale, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
+
+    const locale = this._resolveLocale();
+
+    // Datumsformat-Präferenz bestimmen. Priorität:
+    // 1) Karten-Option `date_format` (DMY | MDY | YMD | language | system)
+    // 2) Home-Assistant-Einstellung hass.locale.date_format
+    // 3) Fallback: der Sprache/dem Locale überlassen
+    const cardPref = (this._config && this._config.date_format) || null;
+    const haPref =
+      (this._hass && this._hass.locale && this._hass.locale.date_format) ||
+      null;
+    const pref = (cardPref || haPref || 'language').toString().toLowerCase();
+
+    // Explizite Reihenfolge erzwingen (Tag/Monat/Jahr-Anordnung),
+    // dabei aber das Locale für Trennzeichen/Zahlen beibehalten.
+    const dayOpts = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    try {
+      if (pref === 'dmy') {
+        return this._formatDateOrder(d, locale, ['day', 'month', 'year']);
+      }
+      if (pref === 'mdy') {
+        return this._formatDateOrder(d, locale, ['month', 'day', 'year']);
+      }
+      if (pref === 'ymd') {
+        return this._formatDateOrder(d, locale, ['year', 'month', 'day']);
+      }
+      if (pref === 'system') {
+        // Browser-/Systemlocale entscheiden lassen
+        return d.toLocaleDateString(undefined, dayOpts);
+      }
+      // 'language' oder unbekannt: dem HA-Locale überlassen
+      return d.toLocaleDateString(locale, dayOpts);
+    } catch (e) {
+      return d.toLocaleDateString(locale, dayOpts);
+    }
+  }
+
+  /**
+   * Formatiert ein Datum in einer erzwungenen Feldreihenfolge,
+   * verwendet dabei aber die locale-typischen Zahlen/Trennzeichen.
+   */
+  _formatDateOrder(date, locale, order) {
+    const parts = {
+      day: String(date.getDate()).padStart(2, '0'),
+      month: String(date.getMonth() + 1).padStart(2, '0'),
+      year: String(date.getFullYear()),
+    };
+    // Locale-typisches Trennzeichen ermitteln (via Intl-Parts)
+    let sep = '.';
+    try {
+      const fmt = new Intl.DateTimeFormat(locale, {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      const literal = fmt
+        .formatToParts(date)
+        .find((p) => p.type === 'literal');
+      if (literal && literal.value) sep = literal.value;
+    } catch (e) {
+      // Fallback-Trennzeichen bleibt '.'
+    }
+    return order.map((k) => parts[k]).join(sep);
   }
 
   formatCurrency(value, currencyCode) {
     const num = parseFloat(value);
     if (isNaN(num)) return value;
-    const lang = leasingResolveLang(this._hass);
-    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    const locale = this._resolveLocale();
     // Versuche, das Währungssymbol über Intl zu nutzen; bei ungültigem
     // Code wird der Code selbst angehängt.
     try {
@@ -671,9 +765,8 @@ class LeasingTrackerCard extends HTMLElement {
     const num = parseFloat(value);
     if (isNaN(num)) return value;
     
-    // Zahlenformat an die Systemsprache anpassen
-    const lang = leasingResolveLang(this._hass);
-    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    // Zahlenformat an die Home-Assistant-Sprache/Region anpassen
+    const locale = this._resolveLocale();
     
     if (Math.abs(num) >= 1000) {
       return num.toLocaleString(locale, { maximumFractionDigits: 0 });
@@ -958,8 +1051,14 @@ class LeasingTrackerCardEditor extends HTMLElement {
 
   _valueChanged(key, value) {
     if (!this._config) return;
-    // Standardwerte nicht unnötig speichern
-    this._config = { ...this._config, [key]: value };
+    const next = { ...this._config };
+    if (value === undefined || value === null || value === '') {
+      // Leere/Standardwerte nicht persistieren
+      delete next[key];
+    } else {
+      next[key] = value;
+    }
+    this._config = next;
     const event = new CustomEvent('config-changed', {
       detail: { config: this._config },
       bubbles: true,
@@ -1043,6 +1142,7 @@ class LeasingTrackerCardEditor extends HTMLElement {
           <ha-textfield id="columns-field" type="number" min="1" max="4" label="${t('editor_columns')}" value="${this._config.columns ?? 2}"></ha-textfield>
           <ha-textfield id="columns-mobile-field" type="number" min="1" max="4" label="${t('editor_columns_mobile')}" value="${this._config.columns_mobile ?? 1}"></ha-textfield>
         </div>
+        <div class="option" id="date-format-slot"></div>
       </div>
 
       <div class="section">
@@ -1092,6 +1192,37 @@ class LeasingTrackerCardEditor extends HTMLElement {
       this._valueChanged('columns_mobile', isNaN(v) ? 1 : v);
     });
 
+    // Datumsformat-Auswahl (optionaler Override der HA-Einstellung)
+    const dateSelect = document.createElement('ha-select');
+    dateSelect.label = t('editor_date_format');
+    dateSelect.value = this._config.date_format || 'auto';
+    dateSelect.style.width = '100%';
+    // Beim Öffnen des Menüs nicht sofort schließen (HA-Pattern)
+    dateSelect.addEventListener('closed', (e) => e.stopPropagation());
+    const dateOptions = [
+      { value: 'auto', label: t('editor_date_format_auto') },
+      { value: 'DMY', label: t('editor_date_format_dmy') },
+      { value: 'MDY', label: t('editor_date_format_mdy') },
+      { value: 'YMD', label: t('editor_date_format_ymd') },
+    ];
+    dateOptions.forEach((opt) => {
+      const item = document.createElement('mwc-list-item');
+      item.value = opt.value;
+      item.innerHTML = opt.label;
+      dateSelect.appendChild(item);
+    });
+    dateSelect.addEventListener('selected', (e) => {
+      const val = e.target.value;
+      // 'auto' bedeutet: keine Option speichern -> HA-Einstellung nutzen
+      if (!val || val === 'auto') {
+        this._valueChanged('date_format', undefined);
+      } else {
+        this._valueChanged('date_format', val);
+      }
+    });
+    const dateSlot = container.querySelector('#date-format-slot');
+    if (dateSlot) dateSlot.appendChild(dateSelect);
+
     // Schalter
     container.querySelectorAll('ha-switch[data-key]').forEach((sw) => {
       sw.addEventListener('change', (e) => {
@@ -1116,7 +1247,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c  LEASING-TRACKER-CARD  %c v1.4.0 ',
+  '%c  LEASING-TRACKER-CARD  %c v1.5.0 ',
   'color: white; background: #4A90E2; font-weight: 700;',
   'color: #4A90E2; background: white; font-weight: 700;'
 );
