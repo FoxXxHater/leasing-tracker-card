@@ -1125,6 +1125,27 @@ class LeasingTrackerCardEditor extends HTMLElement {
         }
         .row2 { display: flex; gap: 12px; }
         .row2 > * { flex: 1; }
+        .select-label {
+          display: block;
+          font-size: 0.85em;
+          color: var(--secondary-text-color);
+          margin: 8px 0 4px;
+        }
+        .native-select {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 10px 12px;
+          border-radius: 4px;
+          border: 1px solid var(--divider-color);
+          background: var(--secondary-background-color, var(--card-background-color));
+          color: var(--primary-text-color);
+          font-size: 1em;
+          cursor: pointer;
+        }
+        .native-select:focus {
+          outline: none;
+          border-color: var(--primary-color);
+        }
       </style>
 
       <div class="section">
@@ -1191,37 +1212,36 @@ class LeasingTrackerCardEditor extends HTMLElement {
       const v = parseInt(e.target.value, 10);
       this._valueChanged('columns_mobile', isNaN(v) ? 1 : v);
     });
-
-    // Datumsformat-Auswahl (optionaler Override der HA-Einstellung)
-    const dateSelect = document.createElement('ha-select');
-    dateSelect.label = t('editor_date_format');
-    dateSelect.value = this._config.date_format || 'auto';
-    dateSelect.style.width = '100%';
-    // Beim Öffnen des Menüs nicht sofort schließen (HA-Pattern)
-    dateSelect.addEventListener('closed', (e) => e.stopPropagation());
-    const dateOptions = [
-      { value: 'auto', label: t('editor_date_format_auto') },
-      { value: 'DMY', label: t('editor_date_format_dmy') },
-      { value: 'MDY', label: t('editor_date_format_mdy') },
-      { value: 'YMD', label: t('editor_date_format_ymd') },
-    ];
-    dateOptions.forEach((opt) => {
-      const item = document.createElement('mwc-list-item');
-      item.value = opt.value;
-      item.innerHTML = opt.label;
-      dateSelect.appendChild(item);
-    });
-    dateSelect.addEventListener('selected', (e) => {
-      const val = e.target.value;
-      // 'auto' bedeutet: keine Option speichern -> HA-Einstellung nutzen
-      if (!val || val === 'auto') {
-        this._valueChanged('date_format', undefined);
-      } else {
-        this._valueChanged('date_format', val);
-      }
-    });
+    // Datumsformat-Auswahl (optionaler Override der HA-Einstellung).
+    // Natives <select> für maximale Kompatibilität (ha-select ist im
+    // Karten-Editor nicht immer geladen und würde sonst leer bleiben).
     const dateSlot = container.querySelector('#date-format-slot');
-    if (dateSlot) dateSlot.appendChild(dateSelect);
+    if (dateSlot) {
+      const current = this._config.date_format || 'auto';
+      const dateOptions = [
+        { value: 'auto', label: t('editor_date_format_auto') },
+        { value: 'DMY', label: t('editor_date_format_dmy') },
+        { value: 'MDY', label: t('editor_date_format_mdy') },
+        { value: 'YMD', label: t('editor_date_format_ymd') },
+      ];
+      dateSlot.innerHTML = `
+        <label class="select-label">${t('editor_date_format')}</label>
+        <select id="date-format-select" class="native-select">
+          ${dateOptions
+            .map(
+              (o) =>
+                `<option value="${o.value}" ${o.value === current ? 'selected' : ''}>${o.label}</option>`
+            )
+            .join('')}
+        </select>
+      `;
+      const dateSelect = dateSlot.querySelector('#date-format-select');
+      dateSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        // 'auto' bedeutet: keine Option speichern -> HA-Einstellung nutzen
+        this._valueChanged('date_format', !val || val === 'auto' ? undefined : val);
+      });
+    }
 
     // Schalter
     container.querySelectorAll('ha-switch[data-key]').forEach((sw) => {
@@ -1247,7 +1267,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c  LEASING-TRACKER-CARD  %c v1.5.0 ',
+  '%c  LEASING-TRACKER-CARD  %c v1.5.1 ',
   'color: white; background: #4A90E2; font-weight: 700;',
   'color: #4A90E2; background: white; font-weight: 700;'
 );
