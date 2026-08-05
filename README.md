@@ -210,6 +210,7 @@ show_average_day: false
 | `show_progress` | `true` | Progress bar |
 | `columns` | `2` | Number of columns (desktop) |
 | `columns_mobile` | `1` | Number of columns (mobile, < 600px) |
+| `date_format` | *(HA setting)* | Override date format: `DMY`, `MDY` or `YMD`. If omitted, the Home Assistant locale setting is used |
 | `metric_background` | - | Background color of the individual tiles |
 | `metric_background_hover` | - | Background color on mouse hover |
 
@@ -486,6 +487,7 @@ show_average_day: false
 | `show_progress` | `true` | Fortschrittsbalken |
 | `columns` | `2` | Anzahl der Spalten (Desktop) |
 | `columns_mobile` | `1` | Anzahl der Spalten (Mobil, < 600px) |
+| `date_format` | *(HA-Einstellung)* | Datumsformat überschreiben: `DMY`, `MDY` oder `YMD`. Ohne Angabe wird die Home-Assistant-Einstellung verwendet |
 | `metric_background` | - | Hintergrundfarbe der einzelnen Elemente |
 | `metric_background_hover` | - | Hintergrundfarbe beim Drüberfahren mit der Maus |
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0] - 02-08-2026
+
+- Date formatting now follows the Home Assistant locale settings
+    - Uses the user's real HA language/region (e.g. en-GB shows DD/MM/YYYY, not US format)
+    - Respects the Home Assistant "Date format" preference (DMY / MDY / YMD)
+    - Numbers and currency also follow the full HA locale, not just DE/EN
+- New optional `date_format` card option (auto / DMY / MDY / YMD) with a selector in the graphical editor
+- Card re-renders immediately when the language or date format is changed
+
 ## [1.4.0] - 26-06-2026
 
 - Support for the four new sensors of integration v1.4.0
